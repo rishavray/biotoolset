@@ -1,8 +1,11 @@
+#!/usr/bin/python
+
 import argparse
 import os
 import gzip
 import sys
 
+#Defining the argparse object and its attributes
 parser = argparse.ArgumentParser(description="Runs Quality check on fastq files.\n At least one of the cut off values are required to process")
 requiredArgument = parser.add_argument_group('Required arguments')
 requiredArgument.add_argument("-i", metavar="<input filename>", help="Input fastq file",required=True)
@@ -18,6 +21,7 @@ lower_cutoff=args.lower_cutoff
 infile = args.i
 outfile = args.o
 
+# Sanity checks
 if args.format != "Sanger" and args.format != "Illumina":
 	sys.stderr.write("Input format has to be 'Sanger' or 'Illumina'\n")
 	exit()
@@ -25,6 +29,7 @@ if (average_cutoff + lower_cutoff ) == 0:
 	sys.stderr.write("Define a quality cutoff. Use -h option to see help\n")
 	exit()
 
+# Checking and setting input/output paths 
 out_path = os.path.split(outfile)[0]
 in_path = os.path.split(infile)[0]
 if not os.path.isfile(infile):
@@ -45,11 +50,14 @@ else:
 	outfile_pass_pt = open(outfile+"_pass","wb")
 	outfile_fail_pt = open(outfile+"_fail","wb")
 
+# Setting differences with formats
+
 if in_format == 'Sanger':
 	diff = 33
 elif in_format == 'Illumina':
 	diff = 64
 
+# Quality checking
 for line in infilept:
 	read = [line.strip()]
 	read.append(infilept.readline().strip())

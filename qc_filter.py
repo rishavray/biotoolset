@@ -58,7 +58,10 @@ elif in_format == 'Illumina':
 	diff = 64
 
 # Quality checking
-for line in infilept:
+while True:
+	line = infilept.readline().strip()
+	if not line:
+		break
 	read = [line.strip()]
 	read.append(infilept.readline().strip())
 	read.append(infilept.readline().strip())

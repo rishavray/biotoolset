@@ -13,12 +13,15 @@ requiredArgument.add_argument("-o", metavar="<output filename>", help="Output fa
 requiredArgument.add_argument("--format", metavar="<format>", choices=['fastq', 'fasta'], help="Input format. Must be 'fastq' or 'fasta'")
 args = parser.parse_args()
 
+#Setting attributes and Sanity check
+
 infile = args.i
 outfile = args.o
 in_format = args.format
 
 if infile == "-":
 	infile_pt = sys.stdin
+	sys.stderr.write("Reading from stdin\n")
 else:
 	if not os.path.isfile(infile):
 		sys.stderr.write("Not a valid input file\n")
@@ -36,11 +39,17 @@ else:
 		outfile += ".gz"
 	outfile_pt = gzip.open(outfile,"wb")
 
+#Collapsing reads
+
 seq_dict = {}
 
-for line in infile_pt:
+while True:
+	line = infile_pt.readline().strip()
+	if not line:
+		break
 	seq = infile_pt.readline().strip()
 
+	
 	if in_format == "fastq":
 		
 		if seq in seq_dict:
@@ -56,5 +65,12 @@ for line in infile_pt:
 		else:
 			seq_dict[seq] = 1
 
+#printing collapsed reads
+i = 0
 for key in seq_dict:
-	outfile_pt.write(">" + str(seq_dict[key]) + "\n" + key + "\n")
+	seq_id = 'seq' + str(i).zfill(6)
+	outfile_pt.write(">" + str(seq_dict[key]) + ":" + seq_id + "\n" + key + "\n")
+	i += 1
+
+outfile_pt.close()
+infile_pt.close()

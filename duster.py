@@ -91,4 +91,4 @@ while True:
 	else:
 		writeRead(read,outfile_bad_pt,in_format)
 		dusty += 1
-sys.stderr.write("Found " + str(non_dusty) + " non dusty reads and " + str(dusty) + " ok reads\n")
+sys.stderr.write("Found " + str(non_dusty) + " non dusty reads and " + str(dusty) + " dusty reads\n")

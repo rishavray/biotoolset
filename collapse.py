@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(description="Collapses the reads by merging the
 requiredArgument = parser.add_argument_group('Required arguments')
 requiredArgument.add_argument("-i", metavar="<input filename>", help="Input fastq file. - if input is stdin",required=True)
 requiredArgument.add_argument("-o", metavar="<output filename>", help="Output fastq file. - if output is stdout",required=True)
-requiredArgument.add_argument("--format", metavar="<format>", choices=['fastq', 'fasta'], help="Input format. Must be 'fastq' or 'fasta'")
+requiredArgument.add_argument("--format", metavar="<format>", choices=['fastq', 'fasta'], help="Input format. Must be 'fastq' or 'fasta'",required=True)
 args = parser.parse_args()
 
 #Setting attributes and Sanity check
@@ -27,10 +27,11 @@ else:
 		sys.stderr.write("Not a valid input file\n")
 		exit()
 	else:
+		sys.stderr.write("Reading from file" + infile + "\n")
 		if infile.endswith(".gz"):
 			infile_pt = gzip.open(infile,"rb")
 		else:
-			infilept = open(infile,"rb")
+			infile_pt = open(infile,"rb")
 
 if outfile == "-":
 	outfile_pt = sys.stdout
@@ -42,7 +43,8 @@ else:
 #Collapsing reads
 
 seq_dict = {}
-
+sys.stderr.write("Processing reads\n")
+original_read_count = 0
 while True:
 	line = infile_pt.readline().strip()
 	if not line:
@@ -56,14 +58,16 @@ while True:
 			seq_dict[seq] += 1
 		else:
 			seq_dict[seq] = 1
-		infile_pt.readline()
-		infile_pt.readline()
+		infile_pt.readline().strip()
+		infile_pt.readline().strip()
 	else:
 
 		if seq in seq_dict:
 			seq_dict[seq] += 1
 		else:
 			seq_dict[seq] = 1
+
+	original_read_count += 1
 
 #printing collapsed reads
 i = 0
@@ -74,3 +78,5 @@ for key in seq_dict:
 
 outfile_pt.close()
 infile_pt.close()
+sys.stderr.write("Original number of reads: " + str(original_read_count) + "\n")
+sys.stderr.write("collapsed number of reads: " + str(len(seq_dict)) + "\n")

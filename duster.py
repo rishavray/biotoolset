@@ -22,7 +22,7 @@ parser.add_argument("--threshold", default=0.75, metavar="<value>", type=float, 
 requiredArgument = parser.add_argument_group('Required arguments')
 requiredArgument.add_argument("-i", metavar="<input filename>", help="Input fastq file. - if input is stdin",required=True)
 requiredArgument.add_argument("-o", metavar="<output filename>", help="Output fastq file. - if output is stdout",required=True)
-requiredArgument.add_argument("--format", metavar="<format>", choices=['fastq', 'fasta'], help="Input format. Must be 'fastq' or 'fasta'")
+requiredArgument.add_argument("--format", metavar="<format>", choices=['fastq', 'fasta'], help="Input format. Must be 'fastq' or 'fasta'",required=True)
 args = parser.parse_args()
 
 #setting attributes and sanity check
@@ -35,15 +35,17 @@ max_motif = args.max
 
 if infile == "-":
 	infile_pt = sys.stdin
+	sys.stderr.write("Reading from stdin\n")
 else:
 	if not os.path.isfile(infile):
 		sys.stderr.write("Not a valid input file\n")
 		exit()
 	else:
+		sys.stderr.write("Reading from file" + infile + "\n")
 		if infile.endswith(".gz"):
 			infile_pt = gzip.open(infile,"rb")
 		else:
-			infilept = open(infile,"rb")
+			infile_pt = open(infile,"rb")
 
 if outfile == "-":
 	outfile_good_pt = sys.stdout
@@ -55,6 +57,10 @@ else:
 	if not outfile.endswith(".gz"):
 		outfile_good_pt = gzip.open(outfile+"_good.gz","wb")
 		outfile_bad_pt = gzip.open(outfile+"_bad.gz","wb")
+
+dusty = 0
+non_dusty = 0
+sys.stderr.write("Processing reads\n")
 
 while True:
 	line = infile_pt.readline().strip()
@@ -81,5 +87,8 @@ while True:
 
 	if good:
 		writeRead(read,outfile_good_pt,in_format)
+		non_dusty += 1
 	else:
 		writeRead(read,outfile_bad_pt,in_format)
+		dusty += 1
+sys.stderr.write("Found " + str(non_dusty) + " non dusty reads and " + str(dusty) + " ok reads\n")

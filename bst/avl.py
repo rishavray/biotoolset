@@ -38,6 +38,32 @@ class AVLTree():
 
 		self.rebalance()
 
+	def delete(self, key):
+		if self.node != None:
+			if self.node.key == key:
+				if not self.node.left.node and not self.node.right.node:
+					self.node = None
+				elif not self.node.left.node:
+					self.node = self.node.right.node
+				elif not self.node.right.node:
+					self.node = self.node.left.node
+				else:
+					successor = self.node.right.node
+					while successor and successor.left.node:
+						successor = successor.left.node
+
+					if successor:
+						self.node.key = successor.key
+
+						self.node.right.delete(successor.key)
+			elif key < self.node.key:
+				self.node.left.delete(key)
+
+			elif key > self.node.key:
+				self.node.right.delete(key)
+
+			self.rebalance()
+
 	def rebalance(self):
         # if rebalancing required update height balance tree non recursive
 
@@ -168,11 +194,15 @@ class GenAVLTree:
 	def print_genome(self,key='all'):
 		if key == 'all':
 			for key in self.chroms:
+				if self.chroms[key]:
+					print key
+					self.chroms[key].print_tree()
+		else:
+			if key in self.chroms:
 				print key
 				self.chroms[key].print_tree()
-		else:
-			print key
-			self.chroms[key].print_tree()
+			else:
+				print "Given chromosome not in genome"
 
 	def __setitem__(self,key,value):
 		self.insert(key,value)
@@ -194,3 +224,9 @@ class GenAVLTree:
 		else:
 			self.chroms[chrom] = AVLTree()
 			self.chroms[chrom].insert(key,value)
+
+	def delete(self,chrom,key):
+		self.chroms[chrom].delete(key)
+		if not self.chroms[chrom].node:
+			del self.chroms[chrom]
+
